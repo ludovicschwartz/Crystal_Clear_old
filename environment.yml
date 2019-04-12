@@ -6,6 +6,7 @@ channels:
 dependencies:
   - asn1crypto=0.24.0=py36_0
   - backcall=0.1.0=py36_0
+  - beautifulsoup4=4.7.1=py36_1
   - blas=1.0=mkl
   - bleach=3.0.2=py36_0
   - bottleneck=1.2.1=py36h035aef0_1
@@ -24,6 +25,7 @@ dependencies:
   - dill=0.2.8.2=py36_0
   - entrypoints=0.2.3=py36_2
   - expat=2.2.6=he6710b0_0
+  - fastai=1.0.51=1
   - fontconfig=2.13.0=h9420a91_0
   - freetype=2.9.1=h8a8886c_1
   - glib=2.56.2=hd408876_0
@@ -135,7 +137,6 @@ dependencies:
   - zeromq=4.2.5=hf484d3e_1
   - zlib=1.2.11=h7b6447c_3
   - pip:
-    - beautifulsoup4==4.7.1
     - click==7.0
     - fastprogress==0.1.20
     - h11==0.8.1
