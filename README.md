@@ -19,4 +19,12 @@ The pipeline is the following :
 - Update the stft of the audio file with the new spectrogram
 - Create the reconstructed audio file with inverse stft
 
+To use this repo :
+
+-Create an environment with the environment.yml file
+-To listen to existing samples, you can use the listening part of the sample.ipynb notebook
+-To apply the model on new_data, use the upscale.ipynb notebook. It takes around 2 seconds for 3 seconds of music on my CPU (intel i7) or 1 sec for 30 sec of musics on my GPU (nvidia 1070).
+
+I'll add instructions to train the model.
+
 
