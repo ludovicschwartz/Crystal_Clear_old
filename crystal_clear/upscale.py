@@ -24,6 +24,7 @@ def upscale(path_file, learner=None):
                                                             -1, order='F')
     # return samples
     sample_rate = song.frame_rate
+    n_frames = samples.shape[1]
     f, t, Zxx = scipy.signal.stft(samples, sample_rate, nperseg=nperseg)
     data, r = make_3D_into_square(make_into_3D(np.abs(Zxx)))
     n_window = len(data)
@@ -39,6 +40,7 @@ def upscale(path_file, learner=None):
     angle[np.isnan(angle)] = 1
     new_Zxx = angle * data
     _, reconstructed = scipy.signal.istft(new_Zxx, sample_rate)
+    reconstructed = reconstructed[:, :n_frames]
     reconstructed = np.rint(reconstructed).astype(np.int16)
     song._data = bytearray(reconstructed.reshape(1, -1, order='F'))
     return song
@@ -92,6 +94,7 @@ def upscale2(path_file, learner):
     '''
     nperseg = 254
     sz = nperseg // 2 + 1
+    n_pad = sz ** 2
     song = AudioSegment.from_file(path_file)
     if learner is None:
         return song
@@ -99,10 +102,11 @@ def upscale2(path_file, learner):
     n_channels = song.channels
     samples = np.array(song.get_array_of_samples()).reshape(n_channels,
                                                             -1, order='F')
+    n_frames = samples.shape[1]
     # return samples
     sample_rate = song.frame_rate
     # We 0-pad the edge of the music
-    samples = np.pad(samples, ((0, 0), (sz-1, sz-1)), mode='edge')
+    samples = np.pad(samples, ((0, 0), (n_pad, n_pad)), mode='edge')
     f, t, Zxx = scipy.signal.stft(samples, sample_rate, nperseg=nperseg)
     t = t[sz-1:-sz+1]
     data = make_into_3D(np.abs(Zxx))
@@ -119,6 +123,7 @@ def upscale2(path_file, learner):
     angle[np.isnan(angle)] = 1
     new_Zxx = angle * data
     _, reconstructed = scipy.signal.istft(new_Zxx, sample_rate)
+    reconstructed = reconstructed[:, :n_frames]
     reconstructed = np.rint(reconstructed).astype(np.int16)
     song._data = bytearray(reconstructed.reshape(1, -1, order='F'))
     return song
