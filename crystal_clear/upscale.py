@@ -115,6 +115,8 @@ def upscale2(path_file, learner):
 
     def predict_method(a):
         m = a.max()
+        if m == 0:
+            return a
         return learner.predict(a / m)[0].data.numpy().astype(np.float32) * m
     data = make_weighted_average_on_window(data, predict_method)
     # Same as upscale here
