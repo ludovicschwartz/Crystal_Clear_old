@@ -24,7 +24,7 @@ To use this repo :
 - To listen to existing samples, you can use the listening part of the sample.ipynb notebook  
 - To apply the model on new_data, use the upscale.ipynb notebook. It takes around 2 seconds for 3 seconds of music on my CPU   (intel i7) or 1 sec for 30 sec of musics on my GPU (nvidia 1070).  
 
-Note : If you want to apply the model on new_data, the last model can be found on https://drive.google.com/file/d/1XRl6zHU3XoAmTN9LmXXqa1MbVEZIBlYz/view?usp=sharing.
+Note : If you want to apply the model on new_data, the last model can be found on https://drive.google.com/open?id=1w0H4W7ZCVJARe9rokfMCOOZn4yJXn3yY
 I'll add instructions to train the model.
 
 
