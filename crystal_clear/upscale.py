@@ -8,17 +8,28 @@ from fastai.vision.image import open_image
 from crystal_clear.prepare import make_3D_into_square, make_into_3D
 from pathlib import Path
 from tqdm import tqdm
+from crystal_clear.utils import FeatureLoss
+from fastai.basic_data import DatasetType
+from fastai.vision.data import imagenet_stats, normalize, denormalize
+import torch
+
+mean_img_net = torch.tensor(imagenet_stats[0])
+std_img_net = torch.tensor(imagenet_stats[1])
 
 
-def upscale(path_file, learner=None):
+def upscale(path_file, learner=None, bs=32, use_gpu=True):
     '''
     Upscale the file located in path_file using the learner.
     '''
+    use_gpu = torch.cuda.is_available() & use_gpu
+    if use_gpu:
+        print('gpu is used for prediction')
+    else:
+        print('cpu is used for prediction')
     nperseg = 254
     song = AudioSegment.from_file(path_file)
     if learner is None:
         return song
-    from_img = False
     n_channels = song.channels
     samples = np.array(song.get_array_of_samples()).reshape(n_channels,
                                                             -1, order='F')
@@ -27,14 +38,29 @@ def upscale(path_file, learner=None):
     n_frames = samples.shape[1]
     f, t, Zxx = scipy.signal.stft(samples, sample_rate, nperseg=nperseg)
     data, r = make_3D_into_square(make_into_3D(np.abs(Zxx)))
-    n_window = len(data)
-    for i, array in tqdm(enumerate(data), total=n_window):
-        m = array.max()
-        array = array / m
-        data[i] = learner.predict(array)[0].data.numpy().astype(np.float32) * m
+    data = np.stack(data)
+    m = data.max(axis=(1, 2, 3), keepdims=True)
+    data = data / m
+    data[np.isnan(data)] = 1
+    preds = []
+    n_step = data.shape[0] // bs + (data.shape[0] % bs != 0)
+    for k in tqdm(range(n_step)):
+        if use_gpu:
+            images = normalize(torch.tensor(data[k*bs:min((k+1)*bs,
+                                                 data.shape[0])]),
+                               mean_img_net,
+                               std_img_net).cuda()
+        else:
+            images = normalize(torch.tensor(data[k*bs:(k+1*bs)]),
+                               mean_img_net,
+                               std_img_net)
+        preds.append(denormalize(learner.model(images).cpu().detach(),
+                                 mean_img_net,
+                                 std_img_net).numpy())
+    data = np.concatenate(preds, axis=0) * m
+    data = np.concatenate(list(data), axis=2)
     if r != 0:
-        data[-1] = data[-1][:, :, :r]
-    data = np.concatenate(data, axis=2)
+        data = data[:, :, :(r-f.size)]
     data = data[:n_channels]
     angle = (Zxx / np.abs(Zxx))
     angle[np.isnan(angle)] = 1
@@ -52,8 +78,8 @@ def make_weighted_average_on_window(array, predict_method, padded=True):
         array = np.pad(array, ((0, 0), (0, 0), (sz-1, sz-1)), mode='edge')
     else:
         n = n - 2 * (sz-1)
-    sliding = np.stack([predict_method(array[:, :, i:i+sz])
-                        for i in tqdm(range(n+sz-1))])
+    sliding = predict_method(np.stack([array[:, :, i:i+sz]
+                        for i in range(n+sz-1)]))
 
     sliding_frame = np.lib.stride_tricks.as_strided(
         # Reverse last dimension since we want the last column from the first
@@ -88,10 +114,14 @@ def make_weighted_average_on_window(array, predict_method, padded=True):
     return np.moveaxis(np.sum(sliding_frame * weights, axis=0), 0, 2)
 
 
-def upscale2(path_file, learner):
+def upscale2(path_file, learner=None, bs=32, use_gpu=True):
     '''
     Upscale the file located in path_file using the learner.
     '''
+    if use_gpu:
+        print('gpu is used for prediction')
+    else:
+        print('cpu is used for prediction')
     nperseg = 254
     sz = nperseg // 2 + 1
     n_pad = sz ** 2
@@ -113,11 +143,27 @@ def upscale2(path_file, learner):
     Zxx = Zxx[:, :, sz-1:-sz+1]
     n = data.shape[-1]
 
-    def predict_method(a):
-        m = a.max()
-        if m == 0:
-            return a
-        return learner.predict(a / m)[0].data.numpy().astype(np.float32) * m
+    def predict_method(data):
+        m = data.max(axis=(1, 2, 3), keepdims=True)
+        data = data / m
+        data[np.isnan(data)] = 1
+        preds = []
+        n_step = data.shape[0] // bs + (data.shape[0] % bs != 0)
+        for k in tqdm(range(n_step)):
+            if use_gpu:
+                images = normalize(torch.tensor(data[k*bs:min((k+1)*bs,
+                                                data.shape[0])]),
+                                   mean_img_net,
+                                   std_img_net).cuda()
+            else:
+                images = normalize(torch.tensor(data[k*bs:(k+1*bs)]),
+                                   mean_img_net,
+                                   std_img_net)
+            preds.append(denormalize(learner.model(images).cpu().detach(),
+                                     mean_img_net,
+                                     std_img_net).numpy())
+        data = np.concatenate(preds, axis=0) * m
+        return data
     data = make_weighted_average_on_window(data, predict_method)
     # Same as upscale here
     data = data[:n_channels]
@@ -129,31 +175,3 @@ def upscale2(path_file, learner):
     reconstructed = np.rint(reconstructed).astype(np.int16)
     song._data = bytearray(reconstructed.reshape(1, -1, order='F'))
     return song
-
-
-class FeatureLoss(nn.Module):
-    def __init__(self, m_feat, layer_ids, layer_wgts):
-        super().__init__()
-        self.m_feat = m_feat
-        self.loss_features = [self.m_feat[i] for i in layer_ids]
-        self.hooks = hook_outputs(self.loss_features, detach=False)
-        self.wgts = layer_wgts
-        self.metric_names = ['pixel',] + [f'feat_{i}' for i in range(len(layer_ids))
-              ] + [f'gram_{i}' for i in range(len(layer_ids))]
-
-    def make_features(self, x, clone=False):
-        self.m_feat(x)
-        return [(o.clone() if clone else o) for o in self.hooks.stored]
-
-    def forward(self, input, target):
-        out_feat = self.make_features(target, clone=True)
-        in_feat = self.make_features(input)
-        self.feat_losses = [base_loss(input, target)]
-        self.feat_losses += [base_loss(f_in, f_out)*w
-                             for f_in, f_out, w in zip(in_feat, out_feat, self.wgts)]
-        self.feat_losses += [base_loss(gram_matrix(f_in), gram_matrix(f_out))*w**2 * 5e3
-                             for f_in, f_out, w in zip(in_feat, out_feat, self.wgts)]
-        self.metrics = dict(zip(self.metric_names, self.feat_losses))
-        return sum(self.feat_losses)
-
-    def __del__(self): self.hooks.remove()
