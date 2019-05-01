@@ -24,7 +24,16 @@ To use this repo :
 - To listen to existing samples, you can use the listening part of the sample.ipynb notebook  
 - To apply the model on new_data, use the upscale.ipynb notebook. It takes around 2 seconds for 3 seconds of music on my CPU   (intel i7) or 1 sec for 30 sec of musics on my GPU (nvidia 1070).  
 
-Note : If you want to apply the model on new_data, the last model can be found on https://drive.google.com/open?id=1w0H4W7ZCVJARe9rokfMCOOZn4yJXn3yY
-I'll add instructions to train the model.
+Note : If you want to apply the model on new_data, the last model can be found on :
+- https://drive.google.com/open?id=1w0H4W7ZCVJARe9rokfMCOOZn4yJXn3yY (exported version)
+- https://drive.google.com/open?id=1FHqzGyEaqESOwbpKh3fYZF0cPTVaiaT_ (If you want to retrain)
+- https://drive.google.com/open?id=18yXjNTXvhLmX0GqR2VYK1oJ2A1yUukuH (The target specific Vgg16 classifier weights used for the feature loss)
+
+If you want to train on the data :
+- Launch the Starter_kit.ipynb notebook
+- Execute all cells to download and preprocess the data(It is kinda long at the moment, around 2-3 hours)
+- Classification.ipynb and Vgg_16_class.ipynb contains code to train a genre classifier on the spectrogram and 
+
+
 
 
