@@ -43,10 +43,12 @@ def create_meta_spectr(meta_sound, orig_meta, meta_path):
     n_window and track_id to get the info on the files.
     '''
     meta_path = Path(meta_path)
-    meta_full = meta_sound.merge(orig_meta, on='track_id')[['track_id',
-                                                            'n_window',
-                                                            'track_genre_top',
-                                                            'subset']]
+    meta_full = meta_sound[['track_id',
+                            'n_window']].merge(orig_meta, on='track_id')[['track_id',
+                                                                          'n_window',
+                                                                          'track_genre_top',
+                                                                          'subset']]
+    n_rows = meta_full.shape[0]
     list_id = []
     list_genre = []
     list_valid = []
