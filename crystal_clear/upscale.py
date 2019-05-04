@@ -17,7 +17,7 @@ mean_img_net = torch.tensor(imagenet_stats[0])
 std_img_net = torch.tensor(imagenet_stats[1])
 
 
-def upscale(path_file, learner=None, bs=32, use_gpu=True):
+def upscale(path_file, learner=None, bs=32, use_gpu=True, show_progress=True):
     '''
     Upscale the file located in path_file using the learner.
     '''
@@ -44,7 +44,7 @@ def upscale(path_file, learner=None, bs=32, use_gpu=True):
     data[np.isnan(data)] = 1
     preds = []
     n_step = data.shape[0] // bs + (data.shape[0] % bs != 0)
-    for k in tqdm(range(n_step)):
+    for k in tqdm(range(n_step), disable=not show_progress):
         if use_gpu:
             images = normalize(torch.tensor(data[k*bs:min((k+1)*bs,
                                                  data.shape[0])]),
@@ -114,7 +114,7 @@ def make_weighted_average_on_window(array, predict_method, padded=True):
     return np.moveaxis(np.sum(sliding_frame * weights, axis=0), 0, 2)
 
 
-def upscale2(path_file, learner=None, bs=32, use_gpu=True):
+def upscale2(path_file, learner=None, bs=32, use_gpu=True, show_progress=True):
     '''
     Upscale the file located in path_file using the learner.
     '''
@@ -149,7 +149,7 @@ def upscale2(path_file, learner=None, bs=32, use_gpu=True):
         data[np.isnan(data)] = 1
         preds = []
         n_step = data.shape[0] // bs + (data.shape[0] % bs != 0)
-        for k in tqdm(range(n_step)):
+        for k in tqdm(range(n_step), disable=not show_progress):
             if use_gpu:
                 images = normalize(torch.tensor(data[k*bs:min((k+1)*bs,
                                                 data.shape[0])]),
