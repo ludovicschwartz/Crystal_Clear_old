@@ -47,11 +47,12 @@ def upscale(path_file, learner=None, bs=32, use_gpu=True, show_progress=True):
     for k in tqdm(range(n_step), disable=not show_progress):
         if use_gpu:
             images = normalize(torch.tensor(data[k*bs:min((k+1)*bs,
-                                                 data.shape[0])]),
+                                                          data.shape[0])]),
                                mean_img_net,
                                std_img_net).cuda()
         else:
-            images = normalize(torch.tensor(data[k*bs:(k+1*bs)]),
+            images = normalize(torch.tensor(data[k*bs:min((k+1)*bs,
+                                                          data.shape[0])]),
                                mean_img_net,
                                std_img_net)
         preds.append(denormalize(learner.model(images).cpu().detach(),
@@ -152,11 +153,12 @@ def upscale2(path_file, learner=None, bs=32, use_gpu=True, show_progress=True):
         for k in tqdm(range(n_step), disable=not show_progress):
             if use_gpu:
                 images = normalize(torch.tensor(data[k*bs:min((k+1)*bs,
-                                                data.shape[0])]),
+                                                              data.shape[0])]),
                                    mean_img_net,
                                    std_img_net).cuda()
             else:
-                images = normalize(torch.tensor(data[k*bs:(k+1*bs)]),
+                images = normalize(torch.tensor(data[k*bs:min((k+1)*bs,
+                                                              data.shape[0])]),
                                    mean_img_net,
                                    std_img_net)
             preds.append(denormalize(learner.model(images).cpu().detach(),
