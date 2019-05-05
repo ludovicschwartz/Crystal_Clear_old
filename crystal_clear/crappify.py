@@ -34,17 +34,17 @@ def crappify_group(df_meta, new_path, overwrite=False,
     if not os.path.exists(new_path / 'meta'):
         os.makedirs(new_path / 'meta')
     n_rows = df_meta.shape[0]
-#     for index, row in tqdm(df_meta.iterrows(), total=n_rows):
-#         if not overwrite and os.path.exists(new_path / f'{row.track_id}.mp3'):
-#             continue
-#         subset_folder = f'fma_{row.set_subset}'
-#         path = path_mp3(row.track_id, subset_folder)
-#         try:
-#             crappify_song(path, new_path / 'mp3' / f'{row.track_id}.mp3',
-#                           **kwargs)
-#         except:
-#             print(f'error on track {row.track_id}')
-#             df_meta.drop(index, inplace=True)
+    for index, row in tqdm(df_meta.iterrows(), total=n_rows):
+        if not overwrite and os.path.exists(new_path / f'{row.track_id}.mp3'):
+            continue
+        subset_folder = f'fma_{row.set_subset}'
+        path = path_mp3(row.track_id, subset_folder)
+        try:
+            crappify_song(path, new_path / 'mp3' / f'{row.track_id}.mp3',
+                          **kwargs)
+        except:
+            print(f'error on track {row.track_id}')
+            df_meta.drop(index, inplace=True)
     if df_valid is not None:
         df_meta = df_meta.merge(df_valid, on='track_id', how='left')
         if df_meta.subset.isna().sum() > 0:
