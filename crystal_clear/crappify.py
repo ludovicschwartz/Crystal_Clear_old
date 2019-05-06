@@ -65,10 +65,29 @@ def crappify_group(df_meta, new_path, overwrite=False,
 
 def to_list_square(path):
     song = AudioSegment.from_mp3(path)
-    samples = np.array(song.get_array_of_samples()).reshape(song.channels, -1, order='F')
+    samples = np.array(song.get_array_of_samples()).reshape(song.channels, -1,
+                                                            order='F')
     sample_rate = song.frame_rate
     f, t, Zxx = scipy.signal.stft(samples, sample_rate, nperseg=254)
-    return make_3D_into_square(make_into_3D(np.abs(Zxx)))
+    return make_3D_into_square(make_into_3D(np.abs(Zxx))), song.channels
+
+
+def to_list_square2(path):
+    song = AudioSegment.from_mp3(path)
+    channels = song.channels
+    samples = np.array(song.get_array_of_samples()).reshape(channels, -1,
+                                                            order='F')
+    sample_rate = song.frame_rate
+    f, t, Zxx = scipy.signal.stft(samples, sample_rate, nperseg=254)
+    for i in range(channels):
+        data = np.stack((np.real(Zxx[i]),
+                         np.imag(Zxx[i]),
+                         np.abs(Zxx[i])))
+        if i == 0:
+            x, r = make_3D_into_square(data)
+        if i == 1:
+            x = [x, make_3D_into_square(data)[0]]
+    return x, r, channels
 
 
 def create_images(meta, path_data):
@@ -79,17 +98,57 @@ def create_images(meta, path_data):
     list_rest = []
     valid = meta.subset
     genre = meta.track_genre_top
+    list_n_channels = []
     for _, row in tqdm(meta.iterrows(), total=n_rows):
         track_id = row.track_id
         subset_folder = f'fma_{row.set_subset}'
-        list_square, rest = to_list_square(path_data / f'mp3/{track_id}.mp3')
+        list_square, rest, channels = to_list_square(path_data /
+                                                     f'mp3/{track_id}.mp3')
         list_id.append(track_id)
         list_n_window.append(len(list_square))
+        list_n_channels.append(channels)
         list_rest.append(rest)
         save_to_image(list_square, track_id, path_data / 'crap_spectr/')
         path_orig = path_mp3(track_id, folder=subset_folder)
-        list_square, _ = to_list_square(path_orig)
+        list_square, _, _ = to_list_square(path_orig)
         save_to_image(list_square, track_id, path_data / 'orig_spectr/')
-    pd.DataFrame({'track_id':list_id, 'n_window': list_n_window, 'rest': list_rest, 'genre':genre, 'subset':valid}).to_csv(path_data / 'meta/meta_mp3.csv', index=None)
-    
+    pd.DataFrame({'track_id': list_id, 'n_window': list_n_window,
+                  'rest': list_rest, 'genre': genre,
+                  'n_channels': list_n_channels,
+                  'subset': valid}).to_csv(path_data / 'meta/meta_mp3.csv',
+                                           index=None)
 
+
+def create_tensor(meta, path_data):
+    path_data = Path(path_data)
+    n_rows = meta.shape[0]
+    list_id = []
+    list_n_window = []
+    list_rest = []
+    valid = meta.subset
+    genre = meta.track_genre_top
+    list_n_channels = []
+    for _, row in tqdm(meta.iterrows(), total=n_rows):
+        track_id = row.track_id
+        subset_folder = f'fma_{row.set_subset}'
+        list_square, rest, channels = to_list_square2(path_data /
+                                                      f'mp3/{track_id}.mp3')
+        list_id.append(track_id)
+        if channels == 1:
+            list_n_window.append(len(list_square))
+        else:
+            list_n_window.append(len(list_square[0]))
+        list_n_channels.append(channels)
+        list_rest.append(rest)
+        is_mono = channels == 1
+        save_to_tensor(list_square, track_id, path_data / 'crap_tensor/',
+                       is_mono=is_mono)
+        path_orig = path_mp3(track_id, folder=subset_folder)
+        list_square, _, _ = to_list_square2(path_orig)
+        save_to_tensor(list_square, track_id, path_data / 'orig_tensor/',
+                       is_mono=is_mono)
+    pd.DataFrame({'track_id': list_id, 'n_window': list_n_window,
+                  'rest': list_rest, 'genre': genre,
+                  'n_channels': list_n_channels,
+                  'subset': valid}).to_csv(path_data / 'meta/meta_mp3.csv',
+                                           index=None)

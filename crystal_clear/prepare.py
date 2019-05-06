@@ -2,6 +2,7 @@ import numpy as np
 from pydub import AudioSegment
 from pathlib import Path
 from PIL import Image
+import torch
 import os
 
 
@@ -62,4 +63,21 @@ def save_to_image(list_square, name, folder):
         spectr = (spectr * 255 / np.max(spectr)).astype('uint8')
         Image.fromarray(np.moveaxis(spectr,
                                     0, -1)).save(folder / f'{name}_{i}.png')
+
+
+def save_to_tensor(list_square, name, folder, is_mono):
+    if not is_mono:
+        list_square_left, list_square_right = list_square
+        save_to_tensor(list_square_left, f'{name}_l', folder, is_mono=True)
+        save_to_tensor(list_square_right, f'{name}_r', folder, is_mono=True)
+        return
+    folder = Path(folder)
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    for i, spectr in enumerate(list_square):
+        torch.save(torch.tensor(spectr).type(torch.half),
+                   folder / f'{name}_{i}.ti')
+
+    
+
 

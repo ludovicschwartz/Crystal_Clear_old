@@ -60,3 +60,37 @@ def create_meta_spectr(meta_sound, orig_meta, meta_path):
     df = pd.DataFrame({'spectr_id': list_id, 'genre': list_genre,
                        'subset': list_valid})
     df.to_csv(meta_path / 'meta_spectr.csv', index=None)
+
+
+def create_meta_tensor(meta_sound, orig_meta, meta_path):
+    '''
+    Meta_sound is a dataframe that countains 3 columns, track_id, n_window and
+    rest. Rest is needed to reconstruct the sound file, but we only need
+    n_window and track_id to get the info on the files.
+    '''
+    meta_path = Path(meta_path)
+    meta_full = meta_sound[['track_id',
+                            'n_window',
+                            'n_channels']].merge(orig_meta,
+                                                 on='track_id')[['track_id',
+                                                                 'n_window',
+                                                                 'track_genre_top',
+                                                                 'n_channels',
+                                                                 'subset']]
+    n_rows = meta_full.shape[0]
+    list_id = []
+    list_genre = []
+    list_valid = []
+    for i, row in tqdm(meta_full.iterrows(), total=n_rows):
+        for j in range(row.n_window):
+            if row.n_channels == 1:
+                c_name = ['']
+            else:
+                c_name = ['_l', '_r']
+            for n in c_name:
+                list_id.append(f'{row.track_id}{n}_{j}.ti')
+                list_genre.append(row.track_genre_top)
+                list_valid.append(row.subset)
+    df = pd.DataFrame({'spectr_id': list_id, 'genre': list_genre,
+                       'subset': list_valid})
+    df.to_csv(meta_path / 'meta_tensor.csv', index=None)
