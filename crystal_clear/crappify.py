@@ -108,10 +108,12 @@ def create_images(meta, path_data):
         list_n_window.append(len(list_square))
         list_n_channels.append(channels)
         list_rest.append(rest)
-        save_to_image(list_square, track_id, path_data / 'crap_spectr/')
+        save_to_image(list_square, track_id, path_data / 'image_pipeline' 
+                                             / 'crap_spectr/')
         path_orig = path_mp3(track_id, folder=subset_folder)
         list_square, _, _ = to_list_square(path_orig)
-        save_to_image(list_square, track_id, path_data / 'orig_spectr/')
+        save_to_image(list_square, track_id, path_data / 'image_pipeline' 
+                                             / 'orig_spectr/')
     pd.DataFrame({'track_id': list_id, 'n_window': list_n_window,
                   'rest': list_rest, 'genre': genre,
                   'n_channels': list_n_channels,
@@ -141,11 +143,13 @@ def create_tensor(meta, path_data):
         list_n_channels.append(channels)
         list_rest.append(rest)
         is_mono = channels == 1
-        save_to_tensor(list_square, track_id, path_data / 'crap_tensor/',
+        save_to_tensor(list_square, track_id, (path_data / 'tensor_pipeline'
+                                               / 'crap_tensor/'),
                        is_mono=is_mono)
         path_orig = path_mp3(track_id, folder=subset_folder)
         list_square, _, _ = to_list_square2(path_orig)
-        save_to_tensor(list_square, track_id, path_data / 'orig_tensor/',
+        save_to_tensor(list_square, track_id, (path_data / 'tensor_pipeline'
+                                               / 'orig_tensor/'),
                        is_mono=is_mono)
     pd.DataFrame({'track_id': list_id, 'n_window': list_n_window,
                   'rest': list_rest, 'genre': genre,
