@@ -9,7 +9,6 @@ import scipy
 from scipy.signal import stft
 
 
-
 def crappify_song(path1, path2, **kwargs):
     song = AudioSegment.from_mp3(path1)
     song.export(path2, **kwargs)
@@ -50,7 +49,7 @@ def crappify_group(df_meta, new_path, overwrite=False,
         if df_meta.subset.isna().sum() > 0:
             print('''
                   There are some 'track_id' not contained in df_valid. Their
-                  'subset' has been set to 'unspecified' 
+                  'subset' has been set to 'unspecified'
                   ''')
         df_meta.subset = df_meta.subset.fillna('unspecified')
     else:
@@ -108,12 +107,12 @@ def create_images(meta, path_data):
         list_n_window.append(len(list_square))
         list_n_channels.append(channels)
         list_rest.append(rest)
-        save_to_image(list_square, track_id, path_data / 'image_pipeline' 
-                                             / 'crap_spectr/')
+        save_to_image(list_square, track_id, path_data / 'image_pipeline'
+                                                       / 'crap_spectr/')
         path_orig = path_mp3(track_id, folder=subset_folder)
         list_square, _, _ = to_list_square(path_orig)
-        save_to_image(list_square, track_id, path_data / 'image_pipeline' 
-                                             / 'orig_spectr/')
+        save_to_image(list_square, track_id, path_data / 'image_pipeline'
+                                                       / 'orig_spectr/')
     pd.DataFrame({'track_id': list_id, 'n_window': list_n_window,
                   'rest': list_rest, 'genre': genre,
                   'n_channels': list_n_channels,
