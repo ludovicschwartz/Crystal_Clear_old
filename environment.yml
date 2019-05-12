@@ -16,6 +16,8 @@ dependencies:
   - chardet=3.0.4=py36_1
   - cryptography=2.4.2=py36h1ba5d50_0
   - cuda100=1.0=0
+  - cudatoolkit=10.0.130=0
+  - cudnn=7.3.1=cuda10.0_0
   - cycler=0.10.0=py36_0
   - cymem=2.0.2=py36hfd86e86_0
   - cytoolz=0.9.0.1=py36h14c3975_1
@@ -25,7 +27,7 @@ dependencies:
   - dill=0.2.8.2=py36_0
   - entrypoints=0.2.3=py36_2
   - expat=2.2.6=he6710b0_0
-  - fastai=1.0.51=1
+  - fastai=1.0.52=1
   - fontconfig=2.13.0=h9420a91_0
   - freetype=2.9.1=h8a8886c_1
   - glib=2.56.2=hd408876_0
@@ -101,7 +103,7 @@ dependencies:
   - pysocks=1.6.8=py36_0
   - python=3.6.8=h0371630_0
   - python-dateutil=2.7.5=py36_0
-  - pytorch=1.0.0=py3.6_cuda10.0.130_cudnn7.4.1_1
+  - pytorch=1.1.0=py3.6_cuda10.0.130_cudnn7.5.1_0
   - pytz=2018.7=py36_0
   - pyyaml=3.13=py36h14c3975_0
   - pyzmq=17.1.2=py36h14c3975_0
@@ -121,7 +123,7 @@ dependencies:
   - thinc=6.12.1=py36h637b7d7_1000
   - tk=8.6.8=hbc83047_0
   - toolz=0.9.0=py36_0
-  - torchvision=0.2.1=py36_0
+  - torchvision=0.2.2=py_3
   - tornado=5.1.1=py36h7b6447c_0
   - tqdm=4.28.1=py36h28b3542_0
   - traitlets=4.3.2=py36_0
