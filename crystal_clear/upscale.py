@@ -48,6 +48,6 @@ def upscale(path_file, proc, song_proc, learner=None, bs=32, use_gpu=True,
     if learner is None:
         return song
     data_list = song_proc.process_in(song)
-    data_list = [predict_method(data, learner.model, proc, bs, use_gpu)
-                 for data in data_list]
+    data_list = [predict_method(data, learner.model, proc, bs, use_gpu,
+                                show_progress) for data in data_list]
     return song_proc.process_out(data_list)
