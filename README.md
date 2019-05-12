@@ -9,11 +9,15 @@ More specifically, I used https://github.com/mdeff/fma . They did a great job an
   year = {2017},  
   url = {https://arxiv.org/abs/1612.01840}  
 
+The latest model is available on a webapp on the following link : https://crystalclear.staraurryon.com/ 
+Big thanks to my brother [StarAurryon](https://github.com/StarAurryon) for helping me on creating this webapp. Feel free to test the model and if you get interesting results, I would be thrilled to hear about them.
+
 The pipeline is the following : 
 
 - Take as input an audio file  
 - Generate the stft of this file  
-- Take the spectrogram as an img and cut it in square image  
+- Take the spectrogram as an img and cut it in square image
+- There are two pipelines here called the `image_pipeline` and `tensor_pipeline` depending on how you perform this.
 - Pass those images to the model (a Unet) which will upscale them  
 - Update the stft of the audio file with the new spectrogram  
 - Create the reconstructed audio file with inverse stft  
