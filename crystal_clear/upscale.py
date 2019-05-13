@@ -19,10 +19,11 @@ std_img_net = torch.tensor(imagenet_stats[1])
 
 def predict_method(data, model, proc, bs, use_gpu, show_progress=True):
     use_gpu = torch.cuda.is_available() & use_gpu
-    if use_gpu:
-        print('gpu is used for prediction')
-    else:
-        print('cpu is used for prediction')
+    if show_progress:
+        if use_gpu:
+            print('gpu is used for prediction')
+        else:
+            print('cpu is used for prediction')
     preds = []
     n = data.shape[0]
     n_step = n // bs + (n % bs != 0)
