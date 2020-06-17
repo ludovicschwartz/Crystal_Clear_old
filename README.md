@@ -9,7 +9,7 @@ More specifically, I used https://github.com/mdeff/fma . They did a great job an
   year = {2017},  
   url = {https://arxiv.org/abs/1612.01840}  
 
-The latest model is available on a webapp on the following link : https://crystalclear.staraurryon.com/ 
+The latest model is available on a webapp on the following link : https://crystalclear.staraurryon.com/ (The link is currently not unoperational and shall be fixed soon).
 Big thanks to my brother [StarAurryon](https://github.com/StarAurryon) for helping me on creating this webapp. Feel free to test the model and if you get interesting results, I would be thrilled to hear about them.
 
 The pipeline is the following : 
